@@ -1,0 +1,162 @@
+# MBQ — My Belajar Quiz
+
+<p align="center">
+  <img src="mbqlogo.jpeg" alt="Logo MBQ" width="180" />
+</p>
+
+![MBQ](https://img.shields.io/badge/MBQ-My%20Belajar%20Quiz-1A2B6D)
+![Flutter](https://img.shields.io/badge/Flutter-SDK-02569B?logo=flutter&logoColor=white)
+![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart&logoColor=white)
+![Android](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)
+![UTS](https://img.shields.io/badge/Mata%20Kuliah-SI34006-orange)
+
+## 📖 Deskripsi Singkat
+
+**MBQ (My Belajar Quiz)** adalah aplikasi kuis interaktif berbasis Flutter (Android) yang membantu dosen membuat kuis untuk mahasiswa — dipakai di kelas maupun sebagai latihan mandiri di luar jam kuliah. Aplikasi menyediakan daftar kuis per kategori, halaman pengerjaan soal (pilihan ganda, benar/salah, esai) dengan timer, serta hasil dan statistik kuis sebagai bahan evaluasi pembelajaran.
+
+> Fokus UTS ini adalah **UI & layout + pemilihan widget yang tepat**. Seluruh data bersifat statis (dummy) bertema **Quiz Sejarah Umum**; fitur tidak harus berjalan penuh, tetapi **tombol harus berfungsi** (navigasi antar halaman, notifikasi sederhana) dan ada **minimal satu animasi sederhana**.
+
+## 🎨 Identitas Visual
+
+Warna MBQ diambil dari logo (badge biru tua–putih): **biru tua navy** sebagai warna utama dan **putih** sebagai permukaan.
+
+| Peran | Warna | Hex |
+|---|---|---|
+| Primary (AppBar, tombol, kartu terpilih) | 🔵 Biru tua navy (warna logo) | `#1A2B6D` |
+| Background kartu (hero card, lingkaran skor) | 🔵 Navy muda | `#E8EAF4` |
+| Surface / teks di atas navy | ⚪ Putih | `#FFFFFF` |
+| Status "Benar" (fungsional) | 🟢 Hijau | `Colors.green` |
+| Status "Salah" (fungsional) | 🔴 Merah | `Colors.red` |
+
+Warna dan gaya teks dipusatkan di `lib/theme/mbq_colors.dart` (`mbqNavy`, `mbqNavyLight`, `headingStyle`, `questionStyle`). Tema global memakai `useMaterial3: false` agar AppBar dan tombol otomatis berwarna navy-putih (Flutter terbaru memakai Material 3 sebagai default) — rincian di [PROJECTMAP.md](PROJECTMAP.md).
+
+## 🎓 Informasi Mata Kuliah & Kelompok
+
+| Item | Keterangan |
+|---|---|
+| Mata Kuliah | Mobile Programming (SI34006) |
+| Program Studi | Sistem Informasi |
+| Universitas | Universitas Tarumanagara (UNTAR) |
+| Anggota 1 | [Nama 1 – NIM 1] |
+| Anggota 2 | [Nama 2 – NIM 2] |
+| Anggota 3 | [Nama 3 – NIM 3] |
+| Dosen | [FILL IN] |
+
+## ✨ Fitur & Halaman
+
+| Fitur | Muncul di Halaman | Status |
+|---|---|---|
+| 1. Buat kuis dengan 3 tipe soal (pilihan ganda, esai, benar/salah) | QuestionPage (tampilan soal per tipe; kuis "Quiz Sejarah Umum" memuat ketiga tipe) | UI + interaksi (pilih jawaban via `GestureDetector`); esai = placeholder tampilan |
+| 2. Pengaturan timer kuis | QuizDetailPage (info durasi) & QuestionPage (tampilan timer) | UI only (timer statis) — timer berjalan = opsional [Outside material] |
+| 3. Penilaian otomatis pilihan ganda | QuizResultPage (skor & jumlah benar/salah) | UI + interaksi (perhitungan sederhana dengan loop dari data dummy) |
+| 4. Statistik hasil kuis untuk evaluasi | QuizResultPage (ringkasan mini) & StatistikPage *(halaman tambahan)* | UI only |
+
+## 📄 Daftar Halaman
+
+1. **HomePage** (Quiz List) — daftar kuis beserta kategori, jumlah soal, dan durasi; ikon akses ke Statistik. *Halaman wajib.*
+2. **QuizDetailPage** — judul, badge kategori, deskripsi, jumlah soal, durasi, dan tombol "Mulai Kuis". *Halaman wajib.*
+3. **QuestionPage** — teks soal, kartu opsi jawaban (menyesuaikan 3 tipe soal), navigasi soal sebelumnya/berikutnya, dan tampilan timer. *Halaman wajib.*
+4. **QuizResultPage** — skor, jumlah benar/salah, ringkasan hasil, dan mini-statistik; tombol kembali ke beranda. *Halaman wajib.*
+5. **StatistikPage** *(halaman tambahan)* — rekap nilai per kuis dalam bentuk bar sederhana untuk evaluasi belajar.
+
+Detail teknis tiap halaman (wireframe, widget tree, state): lihat [PROJECTMAP.md](PROJECTMAP.md).
+
+## 🗂 Data Dummy (Tema: Quiz Sejarah Umum)
+
+Seluruh data dummy bertema **Quiz Sejarah Umum** (tokoh, tempat, penemuan, dan peristiwa penting dalam sejarah dunia dan Indonesia).
+
+| Kuis | Kategori | Durasi | Soal |
+|---|---|---|---|
+| Quiz Sejarah Umum | Umum | 10 menit | 6 soal campuran: 4 pilihan ganda, 1 benar/salah, 1 esai |
+| Sejarah Indonesia | Indonesia | 5 menit | 5 soal benar/salah |
+| Sejarah Dunia | Dunia | 15 menit | 3 soal esai |
+
+Contoh soal pilihan ganda (✅ = kunci jawaban):
+
+1. Siapa presiden pertama Amerika Serikat? — a) Abraham Lincoln, b) George Washington ✅, c) Thomas Jefferson, d) John Adams
+2. Dimana tembok besar China berada? — a) Jepang, b) Korea, c) Cina ✅, d) Mongolia
+3. Siapa penemu lampu pijar? — a) Nikola Tesla, b) Thomas Alva Edison ✅, c) Albert Einstein, d) Alexander Graham Bell
+4. Kapan Indonesia merdeka? — a) 1940, b) 1945 ✅, c) 1950, d) 1965
+
+Daftar lengkap soal dan model datanya ada di [PROJECTMAP.md](PROJECTMAP.md) (Bab 3).
+
+## 🛠 Teknologi & Prasyarat
+
+Sesuai materi Pertemuan 1–4 (tanpa package eksternal):
+
+| Komponen | Versi/Ketentuan |
+|---|---|
+| Flutter SDK | Versi stabil (di-install di `C:/dev/`) |
+| Dart | Bawaan Flutter SDK |
+| Android Studio | IDE resmi + plugin Flutter & Dart |
+| Android Virtual Device (AVD) | Emulator untuk pengujian (uji juga di ukuran layar kecil) |
+| JDK | Minimal versi 11 |
+
+## ▶️ Cara Menjalankan
+
+```bash
+flutter doctor      # cek kesiapan lingkungan
+flutter pub get     # unduh dependency (tidak ada package eksternal, tapi tetap dijalankan)
+flutter run         # jalankan di emulator/perangkat
+```
+
+## 📁 Struktur Folder (Ringkas)
+
+```
+lib/
+├── main.dart          # titik masuk aplikasi + ThemeData
+├── theme/             # konstanta warna MBQ (mbqNavy) & gaya teks
+├── models/            # class Quiz & Question
+├── data/              # data dummy (dummy_data.dart)
+├── pages/             # 5 halaman aplikasi
+└── widgets/           # komponen reusable (QuizCard, AnswerOptionCard, StatBar)
+```
+
+Struktur lengkap + penjelasan tiap file: lihat [PROJECTMAP.md](PROJECTMAP.md).
+
+## 📚 Batasan Materi (Pertemuan 1–4)
+
+- **M1 (Introduction):** `MaterialApp`, `Scaffold`, `AppBar`, `Text`, `Icon`, `ElevatedButton`, `StatelessWidget`/`StatefulWidget`, `setState`, dasar Dart (class, constructor, method, `final`/`const`, `if`, `for`, ternary).
+- **M2 (Layout):** `Container` + `BoxDecoration`, `Padding`, `Center`, `Align`, `Row`, `Column`, `mainAxisAlignment`/`crossAxisAlignment`, konsep constraints.
+- **M3 (Advanced Layout):** `SizedBox`, `Expanded`, `Flexible`, `Spacer`, `Stack`, `Positioned`, `MediaQuery`, `SafeArea`, `Theme`.
+- **M4 (Gestures & State):** `GestureDetector` (`onTap`), state & `setState()`, interactive UI, `Navigator.push(MaterialPageRoute)` / `Navigator.pop`.
+
+**Tidak dipakai:** state management lanjutan, database, API/HTTP, package eksternal, named routes, `ListView`/`SingleChildScrollView`, widget input P5–P6 (`TextField`, `Checkbox`, `Radio`, `Switch`, `Dropdown`, Picker).
+
+**Di luar materi (diberi label [Outside material] di kode & PROJECTMAP.md):** `AnimatedContainer` (animasi kartu jawaban), `SnackBar` (notifikasi), `Timer` (opsional), `useMaterial3: false` + `ColorScheme.light` (tema), `automaticallyImplyLeading` (AppBar halaman hasil).
+
+**Perlu verifikasi dosen:** `widget.quiz` di class State, `Map<int, int>` untuk menyimpan jawaban, penulisan warna `Color(0xFF…)`, dan apakah perubahan visual via `setState` dihitung sebagai "animasi" bila `AnimatedContainer` tidak diizinkan.
+
+## ✅ Checklist Kriteria Penilaian
+
+- [ ] Minimal 4 halaman UI (tercapai: 5 halaman)
+- [ ] Layout rapi tanpa overflow (uji di AVD kecil & besar), pemilihan widget sesuai konsep layout
+- [ ] Tombol berfungsi (navigasi antar halaman, notifikasi); "Kembali ke Beranda" dari hasil sampai ke HomePage
+- [ ] Minimal 1 animasi sederhana
+- [ ] Menggunakan dummy data (tanpa database); skor benar untuk kuis campuran dan kuis esai-semua tidak error
+- [ ] Sesuai materi Pertemuan 1–4 (di luar materi diberi label)
+- [ ] `main.dart` + file pendukung siap dikumpulkan
+- [ ] Screenshot semua halaman terlampir
+
+## 👥 Pembagian Tugas (Ringkas)
+
+| Anggota | Bagian |
+|---|---|
+| Anggota 1 | `main.dart`, theme, models, dummy data, HomePage + `quiz_card.dart`, StatistikPage + `stat_bar.dart` |
+| Anggota 2 | QuizDetailPage, QuestionPage + `answer_option_card.dart` |
+| Anggota 3 | QuizResultPage (logika skor), animasi & finishing, pengecekan overflow, screenshot & dokumentasi |
+
+Rincian integrasi & pembagian per komponen: lihat [PROJECTMAP.md](PROJECTMAP.md).
+
+## 📸 Screenshot
+
+Lima halaman, enam gambar (QuestionPage punya dua varian).
+
+| No | Halaman | Screenshot |
+|---|---|---|
+| 1 | HomePage (Quiz List) | *[tambahkan gambar di folder `screenshots/`]* |
+| 2 | QuizDetailPage | *[tambahkan gambar]* |
+| 3 | QuestionPage (pilihan ganda) | *[tambahkan gambar]* |
+| 4 | QuestionPage (benar/salah & esai) | *[tambahkan gambar]* |
+| 5 | QuizResultPage | *[tambahkan gambar]* |
+| 6 | StatistikPage *(tambahan)* | *[tambahkan gambar]* |

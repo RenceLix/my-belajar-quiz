@@ -6,7 +6,7 @@
 
 ## 1. Ringkasan Project & Prinsip Desain
 
-MBQ (My Belajar Quiz) adalah aplikasi kuis interaktif (Flutter, Android) untuk UTS Mobile Programming. Fokus penilaian adalah **UI, layout, dan pemilihan widget yang tepat**, sehingga aplikasi dibangun dengan widget Pertemuan 1–4, data dummy statis tanpa database, navigasi dengan `Navigator.push(MaterialPageRoute)`/`Navigator.pop`, dan interaksi dasar dengan `GestureDetector` + `setState()`. Aplikasi terdiri dari 5 halaman (4 wajib + 1 tambahan) yang datanya mengalir satu arah: Home → Detail → Question → Result. Seluruh data dummy bertema **Quiz Sejarah Umum** (tokoh, tempat, dan peristiwa penting dalam sejarah dunia dan Indonesia).
+MBQ (My Belajar Quiz) adalah aplikasi kuis interaktif (Flutter, Android) untuk UTS Mobile Programming. Fokus penilaian adalah **UI, layout, dan pemilihan widget yang tepat**, sehingga aplikasi dibangun dengan widget Pertemuan 1–4, data dummy statis tanpa database, navigasi dengan `Navigator.push(MaterialPageRoute)`/`Navigator.pop`, dan interaksi dasar dengan `GestureDetector` + `setState()`. Aplikasi terdiri dari 6 halaman (1 splash + 4 wajib + 1 tambahan) yang datanya mengalir satu arah: Splash → Home → Detail → Question → Result. Seluruh data dummy bertema **Quiz Sejarah Umum** (tokoh, tempat, dan peristiwa penting dalam sejarah dunia dan Indonesia).
 
 **Konvensi (wajib diikuti fase coding):**
 - **Naming:** file `snake_case.dart`; class `PascalCase`; variabel/method `lowerCamelCase`; field private di class State pakai prefix underscore (`_currentIndex`).
@@ -15,7 +15,7 @@ MBQ (My Belajar Quiz) adalah aplikasi kuis interaktif (Flutter, Android) untuk U
 - **`const` di mana pun memungkinkan** (widget statis seperti `const Text(...)`, `const SizedBox(...)`), konsisten dengan contoh dosen (`const MyApp({super.key})`).
 - **Widget reusable hanya tampilan.** `AnswerOptionCard` dan `StatBar` tidak menerima fungsi/callback (parameter fungsi belum diajarkan). `GestureDetector` + `setState` dipasang di halaman pemilik state, lalu membungkus widget tampilan tersebut.
 - **Kode harus runnable apa adanya**: lengkap dengan `import`, tanpa referensi ke package eksternal.
-- Tidak memakai widget input P5–P6 sebagai solusi utama; setiap widget/teknik di luar M1–4 **wajib diberi label [Outside material]** + alasan + alternatif.
+- Tidak memakai widget input P5–P6 sebagai solusi utama — **satu pengecualian: `TextField` untuk input jawaban esai di QuestionPage [Outside material]** (lihat 5.3); pilihan mc/tf tetap `GestureDetector` + `setState`. Setiap widget/teknik di luar M1–4 **wajib diberi label [Outside material]** + alasan + alternatif.
 - Dart dasar yang dipakai: class/constructor/method, `final`/`const`, nullable `?`, `if`/`else`, `for` biasa (hanya untuk logika hitung skor), ternary `a ? b : c` (ada di contoh dosen `_favorit ? ... : ...`), string interpolation `$nama`. **Tidak dipakai:** `.map().toList()`, collection-`for`/`if` di dalam `children`, `ListView.builder`. Jumlah kartu ditulis manual karena data dummy tetap (3 kuis, mc = 4 opsi, tf = 2 opsi).
 
 Contoh gaya kode yang diikuti (pola kartu jawaban terpilih, **ilustrasi konvensi, bukan implementasi**):
@@ -38,7 +38,7 @@ GestureDetector(
 
 ```
 lib/
-├── main.dart                    # titik masuk: main(), runApp, MaterialApp + ThemeData (tema global)
+├── main.dart                    # titik masuk: main(), runApp, MaterialApp + ThemeData (tema global, home: SplashPage)
 ├── theme/
 │   └── mbq_colors.dart          # konstanta warna MBQ (mbqNavy, mbqNavyLight) + gaya teks (headingStyle, questionStyle)
 ├── models/
@@ -47,7 +47,8 @@ lib/
 ├── data/
 │   └── dummy_data.dart          # List<Quiz> dummyQuizzes: 3 kuis contoh dengan 3 tipe soal
 ├── pages/
-│   ├── home_page.dart           # halaman 1: daftar kuis + akses Statistik
+│   ├── splash_page.dart         # halaman pembuka: logo MBQ + "Tekan dimana saja untuk lanjut kerjakan quiz" (invert: bg navy, teks putih)
+│   ├── home_page.dart           # halaman 1: logo + daftar kuis + akses Statistik
 │   ├── quiz_detail_page.dart    # halaman 2: detail kuis + tombol Mulai Kuis
 │   ├── question_page.dart       # halaman 3: pengerjaan soal (inti aplikasi, paling kompleks)
 │   ├── quiz_result_page.dart    # halaman 4: skor, benar/salah, ringkasan hasil + mini-statistik
@@ -56,6 +57,10 @@ lib/
     ├── quiz_card.dart           # kartu kuis di HomePage (berisi GestureDetector → Detail)
     ├── answer_option_card.dart  # kartu opsi jawaban (tampilan saja; pembungkus GestureDetector ada di QuestionPage)
     └── stat_bar.dart            # satu baris bar statistik di StatistikPage (tampilan saja)
+
+assets/
+└── mbqlogo.png                  # logo MBQ, dipakai SplashPage & HomePage
+                                 # (didaftarkan di pubspec.yaml bagian flutter > assets)
 ```
 
 ---
@@ -148,7 +153,8 @@ Nilai dummy di `StatistikPage` (Umum 80, Indonesia 50, Dunia 40) berada di renta
 
 ```mermaid
 flowchart TD
-    A[HomePage] -- "Navigator.push → QuizDetailPage(quiz)" --> B[QuizDetailPage]
+    S[SplashPage] -- "ketuk di mana saja →\nNavigator.push → HomePage()" --> A[HomePage]
+    A -- "Navigator.push → QuizDetailPage(quiz)" --> B[QuizDetailPage]
     B -- "Navigator.pop(context)" --> A
     B -- "Navigator.push → QuestionPage(quiz)" --> C[QuestionPage]
     C -- "tombol Selesai di soal terakhir →\nNavigator.push → QuizResultPage(quiz, answers)" --> D[QuizResultPage]
@@ -157,15 +163,20 @@ flowchart TD
     E -- "Navigator.pop(context)" --> A
 ```
 
-Tumpukan halaman saat di hasil kuis: **Home → Detail → Question → Result**. Dari Result, satu `pop` hanya sampai ke Question, dua `pop` sampai ke Detail, sehingga untuk kembali ke Home dibutuhkan **tiga** `pop`.
+Halaman pertama yang tampil saat aplikasi dibuka adalah **SplashPage**. Ketuk di mana saja (`GestureDetector` membungkus seluruh body) → `Navigator.push` ke HomePage.
+
+Tumpukan halaman saat di hasil kuis: **Splash → Home → Detail → Question → Result**. Dari Result, satu `pop` hanya sampai ke Question, dua `pop` sampai ke Detail, sehingga untuk kembali ke Home dibutuhkan **tiga** `pop`.
 
 **Aturan navigasi (semua dari materi M4):**
 
 | Aksi | Kode |
 |---|---|
+| Splash → Home | `GestureDetector.onTap` di seluruh layar → `Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePage()))` |
 | Pindah halaman | `Navigator.push(context, MaterialPageRoute(builder: (context) => QuizDetailPage(quiz)))` |
 | Kembali | `Navigator.pop(context)` (tombol back AppBar juga otomatis pop) |
 | Result → Home | `Navigator.pop(context);` ditulis **tiga kali** berurutan, dengan komentar `// pop Result, Question, lalu Detail → sampai di Home` |
+
+> Catatan SplashPage: memakai `push` biasa (bukan `pushReplacement`), sehingga tombol back sistem dari HomePage kembali ke splash — perilaku ini diterima dan tetap 100% materi M4. `pushReplacement` lebih ringkas tetapi **[Outside material]** dan tidak dipakai.
 
 **Pengiriman data antar halaman: lewat constructor posisional (gaya `Mahasiswa` M1), bukan named routes:**
 
@@ -182,6 +193,57 @@ Tumpukan halaman saat di hasil kuis: **Home → Detail → Question → Result**
 
 ## 5. Spesifikasi Per Halaman
 
+### 5.0 SplashPage *(halaman pembuka)*
+
+- **File/class:** `pages/splash_page.dart`, class `SplashPage`.
+- **Type:** `StatelessWidget`. Tidak ada state; satu-satunya interaksi adalah ketukan untuk pindah halaman.
+- **Tampilan khusus (invert):** background `mbqNavy` (biru tua) dengan teks putih — kebalikan dari halaman lain yang ber-background terang dengan teks navy. Senada dengan badge logo MBQ.
+
+**Text wireframe:**
+
+```
+┌──────────────────────────────────┐
+│ (seluruh layar biru tua navy)    │
+│                                  │
+│        ┌────────────────┐        │
+│        │  ┌──────────┐  │        │  ← kartu putih radius 24 berisi logo
+│        │  │  LOGO    │  │        │     (Image.asset assets/mbqlogo.png)
+│        │  │  MBQ     │  │        │
+│        │  └──────────┘  │        │
+│        └────────────────┘        │
+│                                  │
+│   Tekan dimana saja untuk        │  ← teks putih, center
+│   lanjut kerjakan quiz           │
+│                                  │
+└──────────────────────────────────┘
+```
+
+**Widget tree:**
+
+```
+Scaffold(backgroundColor: mbqNavy)          ← [invert] background biru tua
+└── body: GestureDetector(                  ← seluruh layar = area ketuk
+    │    behavior: HitTestBehavior.opaque)  ← [Outside material] agar ketukan di
+    │                                         area kosong tetap terbaca
+    │  onTap: → Navigator.push → HomePage()
+    └── SafeArea
+        └── Center
+            └── Column(mainAxisAlignment: center)
+                ├── Container(kartu putih: BoxDecoration color white,
+                │             radius 24, padding 12)
+                │   └── Image(AssetImage('assets/mbqlogo.png'), width: 200)
+                ├── SizedBox(height: 24)
+                └── Padding(EdgeInsets.symmetric(horizontal: 24))
+                    └── Text("Tekan dimana saja untuk lanjut kerjakan quiz",
+                             putih, center)
+```
+
+- **Widget utama & alasan:** `GestureDetector` membungkus seluruh body agar instruksi "tekan dimana saja" benar-benar berlaku di mana saja; logo dibungkus `Container` putih bersudut bulat supaya kontras di atas background navy (file PNG berlatar putih).
+- **Interaksi/tombol:** ketuk di mana saja → `Navigator.push` → `HomePage()`. Tidak ada AppBar, tidak ada tombol back (halaman ini hanya titik awal).
+- **State yang dikelola:** tidak ada.
+- **Animasi:** tidak ada.
+- **Responsif:** `SafeArea`; `Center` + `Column` agar logo dan teks selalu di tengah pada ukuran layar apa pun; teks dibungkus `Padding` agar tidak menempel tepi di layar kecil.
+
 ### 5.1 HomePage (Quiz List)
 
 - **File/class:** `pages/home_page.dart`, class `HomePage`.
@@ -194,7 +256,9 @@ Tumpukan halaman saat di hasil kuis: **Home → Detail → Question → Result**
 ┌──────────────────────────────────┐
 │ AppBar: "MBQ"           [📊]     │  ← ikon bar_chart → StatistikPage
 ├──────────────────────────────────┤
-│  Pilih Kuis                      │  ← judul section
+│ ┌────┐                           │
+│ │LOGO│  Pilih Kuis              │  ← logo MBQ + judul section (Row)
+│ └────┘                           │
 │ ┌──────────────────────────────┐ │
 │ │ 🏛  Quiz Sejarah Umum        │ │  ← QuizCard (GestureDetector)
 │ │     Umum • 6 soal            │ │
@@ -221,7 +285,10 @@ Scaffold
 └── body: SafeArea
     └── Padding(EdgeInsets.all(16))
         └── Column(crossAxisAlignment: CrossAxisAlignment.start)
-            ├── Text("Pilih Kuis", style: headingStyle)
+            ├── Row                        ← logo + judul section
+            │   ├── Image(AssetImage('assets/mbqlogo.png'), height: 56)
+            │   ├── SizedBox(width: 12)
+            │   └── Text("Pilih Kuis", style: headingStyle)
             ├── SizedBox(height: 16)
             ├── QuizCard(dummyQuizzes[0])
             ├── SizedBox(height: 8)
@@ -322,7 +389,7 @@ Scaffold
 │ AppBar: "Soal 2 dari 6"          │
 ├──────────────────────────────────┤
 │              ┌─────────────────┐ │
-│              │ ⏱ Durasi: 10 mnt│ │  ← Align kanan + Container info timer
+│              │ ⏱ 20..0 detik  │ │  ← countdown per soal; merah di 2 detik terakhir
 │              └─────────────────┘ │
 │ ┌──────────────────────────────┐ │
 │ │ Dimana tembok besar China    │ │  ← Container teks soal
@@ -356,7 +423,7 @@ Scaffold
         └── Column(crossAxisAlignment: stretch)
             ├── Align(alignment: Alignment.centerRight,
             │     child: Container(padding 8, info timer:
-            │             Row(mainAxisSize: min): [Icon(Icons.timer), SizedBox(8), Text(_timerText)]))
+            │             Row(mainAxisSize: min): [Icon(Icons.timer), SizedBox(8), Text("$_remainingSeconds detik")]))
             ├── SizedBox(height: 8)
             ├── Container(teks soal, BoxDecoration radius 12, padding 16)
             ├── SizedBox(height: 16)
@@ -372,7 +439,7 @@ Scaffold
 
 1. **Pilihan ganda (`type == "mc"`):** `Column` berisi 4 kartu yang ditulis manual (jumlah opsi mc di dummy selalu 4). Tiap kartu: `Flexible(child: GestureDetector(onTap: ..., child: AnswerOptionCard("A. ${options[0]}", _answers[_currentIndex] == 0)))`, dipisah `SizedBox(height: 8)`. `onTap` → `setState(() { _answers[_currentIndex] = index; })`. **Tanpa `Radio`/`Checkbox`** (widget P5–P6).
 2. **Benar/salah (`type == "tf"`):** sama dengan mc, tetapi hanya 2 kartu (`"Benar"`, `"Salah"`).
-3. **Esai (`type == "essay"`):** `Container` dengan `BoxDecoration` (border, radius 12, warna abu muda) berisi `Text("Tulis jawaban esai di sini...")` + teks kecil *"Input teks asli = materi lanjutan (P5–P6)"*. **Tidak memakai `TextField`**, murni display placeholder. Tidak ada yang disimpan ke `_answers`.
+3. **Esai (`type == "essay"`):** `Container` dengan `BoxDecoration` (border, radius 12, warna abu muda) berisi **`TextField` (maxLines: 8)** dengan hint *"Tulis jawaban esai di sini..."* + teks kecil *"Input teks (TextField) = materi lanjutan"*. **[Outside material]** — `TextField` + `TextEditingController` adalah widget input P5–P6, dipakai agar esai bisa diketik. Controller disimpan di `Map<int, TextEditingController> _essayControllers` (`putIfAbsent` per index soal) sehingga teks **tersimpan saat pindah soal** dan **tidak ter-reset oleh `setState` timer**; semua controller di-`dispose()` di `dispose()`. Esai tetap tidak dinilai otomatis dan tidak dikirim ke halaman hasil.
 
 > Alasan `Flexible` pada tiap kartu: bila layar sempit (mis. AVD 360×640) atau teks soal panjang, kartu berbagi/menyusut mengikuti sisa ruang sehingga `Column` tidak overflow, tanpa perlu scroll (scroll belum dipelajari). Wajib diuji di AVD kecil sebelum demo.
 
@@ -382,8 +449,9 @@ Scaffold
 |---|---|---|
 | `_currentIndex` | `int` (awal `0`) | Tombol Sebelumnya/Berikutnya: `_currentIndex--` / `_currentIndex++` |
 | `_answers` | `Map<int, int>` (awal `{}`) | Ketuk kartu opsi: `_answers[_currentIndex] = index`. Kartu terpilih dihitung dari `_answers[_currentIndex] == index`, sehingga jawaban tetap ada saat pengguna menekan "Sebelumnya". |
-| `_timerText` | `String` (getter/hasil dari `widget.quiz.durationMinutes`) | Statis; tidak butuh `setState` |
-| `_remainingSeconds` | `int` *(opsional)* | Hanya bila timer berjalan dipakai (Opsi B) |
+| `_remainingSeconds` | `int` (awal `20`) | `Timer.periodic`: tiap detik `setState(() { _remainingSeconds--; })`; di-reset ke 20 tiap ganti soal |
+| `_timer` | `Timer?` *(opsional)* | [Outside material]; di-`cancel()` di `dispose()` dan saat reset/habis |
+| `_secondsPerQuestion` | `int` konstanta `20` | Lama waktu tiap soal; ubah di satu tempat bila ingin lain |
 
 > `_answers` memakai `Map` karena ukuran `List` harus diketahui dari `widget.quiz` dan membutuhkan `initState` (yang belum diajarkan). `Map` kosong cukup dibuat langsung di deklarasi field. `Map<int, int>` **[Needs lecturer verification]**; alternatif: `List<int>` dengan `initState` (diberi label [Outside material]).
 
@@ -396,12 +464,15 @@ Scaffold
 | "Berikutnya" | `setState` → `_currentIndex++`; di soal terakhir tombol berubah menjadi "Selesai" → `Navigator.push` → `QuizResultPage(widget.quiz, _answers)` |
 | Notifikasi ringan (opsional) | `ScaffoldMessenger.of(context).showSnackBar(...)` saat membuka soal esai: *"Esai tidak dinilai otomatis"*. **[Outside material]** (`SnackBar` tidak ada di M1–4; alternatif dalam materi: `Text` kecil berwarna di bawah kotak esai yang muncul via `setState`) |
 
-**Timer: dua opsi (pilih salah satu, konsisten):**
+**Timer countdown per soal (yang dipakai, dulu "Opsi B"):**
 
-| Opsi | Deskripsi | Status |
+| Komponen | Implementasi | Status |
 |---|---|---|
-| **A. Statis (rencana utama, 100% dalam materi)** | `Container` + `Icon(Icons.timer)` + `Text("Durasi: X menit")` dari `quiz.durationMinutes`. Tidak berjalan sendiri. | ✅ M1–3 |
-| B. Berjalan (countdown tiap detik) | `Timer.periodic` dari `dart:async` di `initState()`, tiap tick `setState(() { _remainingSeconds--; })`; cancel di `dispose()`. | **[Outside material]**: `Timer`/`initState` belum diajarkan. Dipakai hanya bila kelompok ingin timer benar-benar berjalan. Alternatif aman = Opsi A. |
+| Countdown 20 detik per soal | `Timer.periodic` dari `dart:async` di `initState()`, tiap tick `setState(() { _remainingSeconds--; })`; reset ke 20 via `_startTimer()` setiap `_changeQuestion`; `cancel()` di `dispose()` dan saat mencapai 0. | **[Outside material]**: `Timer`/`initState` belum diajarkan — tetap satu konsep state `setState` (M4), tanpa package tambahan. |
+| Tanda "hampir habis" | Bila `_remainingSeconds <= 2` (detik ke-19 & ke-20): ikon timer & angka berubah **merah + tebal**, latar chip jadi merah muda. Murni ternary di `build`, tanpa state tambahan. | ✅ M1–M4 (ternary) |
+| Waktu habis (0) | Timer berhenti sendiri (`t.cancel()`); user tetap boleh memilih jawaban — tidak ada auto-pindah soal (dibuat sesederhana mungkin). | ✅ |
+
+**Alternatif statis (dulu "Opsi A", tidak dipakai lagi):** `Text("Durasi: X menit")` dari `quiz.durationMinutes`, 100% dalam materi M1–3. Bila dosen menolak `Timer`, kembalikan ke tampilan statis ini — cukup hapus `initState`/`dispose`/`_startTimer` dan tampilkan `widget.quiz.durationMinutes`.
 
 **Animasi sederhana (kriteria penilaian): dua opsi:**
 
@@ -594,9 +665,12 @@ const TextStyle questionStyle = TextStyle(fontSize: 18, fontWeight: FontWeight.w
 | Primary | `mbqNavy` (`#1A2B6D`, biru tua logo) | AppBar, tombol, kartu terpilih, bar statistik |
 | Background kartu | `mbqNavyLight` (`#E8EAF4`) | hero card, lingkaran skor, kartu terpilih |
 | Surface | `Colors.white` | kartu opsi (tidak terpilih), teks di atas navy |
+| Background SplashPage (invert) | `mbqNavy` + teks `Colors.white` | background penuh SplashPage — kebalikan dari halaman lain yang terang |
 | Success | `Colors.green` | kartu "Benar", centang (warna fungsional, bukan brand) |
 | Error | `Colors.red` | kartu "Salah" (warna fungsional, bukan brand) |
 | Border default | `Colors.grey.shade300` | border kartu |
+
+> **Gaya invert di SplashPage:** hanya halaman pembuka yang membalik skema warna — background `mbqNavy`, font putih — senada dengan badge logo MBQ. Halaman lain tetap memakai gaya normal (background terang, teks navy), sehingga `scaffoldBackgroundColor` global tidak diubah.
 
 ### Tema global (penting: Material 3 vs Material 2)
 
@@ -637,8 +711,8 @@ MaterialApp(
 
 | Fitur Utama | Realisasi di UI (tanpa logika berat) |
 |---|---|
-| 1. Buat kuis 3 tipe soal | `QuestionPage` menampilkan 3 varian tampilan soal lewat method `_buildAnswerArea()`: kartu opsi `GestureDetector` + `AnswerOptionCard` (mc/tf) dan kotak placeholder statis (esai). Kuis "Quiz Sejarah Umum" memuat ketiga tipe sekaligus. Tidak ada form "buat kuis" (butuh input P5–P6); fitur "membuat" direpresentasikan oleh keberagaman data dummy. |
-| 2. Timer kuis | Info durasi di `QuizDetailPage` + tampilan timer di `QuestionPage`. Rencana utama: tampilan statis (Opsi A). Countdown berjalan = `Timer` [Outside material], opsional. |
+| 1. Buat kuis 3 tipe soal | `QuestionPage` menampilkan 3 varian tampilan soal lewat method `_buildAnswerArea()`: kartu opsi `GestureDetector` + `AnswerOptionCard` (mc/tf) dan `TextField` untuk mengetik jawaban esai [Outside material]. Kuis "Quiz Sejarah Umum" memuat ketiga tipe sekaligus. Tidak ada form "buat kuis"; fitur "membuat" direpresentasikan oleh keberagaman data dummy. |
+| 2. Timer kuis | Info durasi di `QuizDetailPage` + **countdown berjalan** di `QuestionPage`: 20 detik per soal (`Timer.periodic` [Outside material]), reset tiap ganti soal, tanda merah pada 2 detik terakhir. |
 | 3. Penilaian otomatis pilihan ganda | `QuizResultPage` membandingkan `answers[i]` dengan `questions[i].correctIndex` lewat loop sederhana, menghitung `correct`/`graded`, lalu `score` (dengan pengecekan `graded == 0`). Esai dilewati (label "dinilai manual"). |
 | 4. Statistik hasil kuis | Mini-statistik per tipe soal di `QuizResultPage` (teks ringkasan) + `StatistikPage` dengan bar `Expanded(flex)` proporsional dari data dummy. |
 
@@ -652,7 +726,8 @@ MaterialApp(
 | Konstanta `const Color(...)`, `TextStyle` | theme/mbq_colors.dart, dipakai semua halaman | M1 (const); `Color(0xFF…)` [Needs lecturer verification] |
 | `Scaffold`, `AppBar` | semua halaman | M1 |
 | `Text`, `Icon` | semua halaman | M1 |
-| `StatelessWidget` | HomePage, QuizDetailPage, QuizResultPage, StatistikPage, semua widget reusable | M1 |
+| `Image.asset` / `AssetImage` + registrasi `assets:` di pubspec | SplashPage (logo besar), HomePage (logo kecil) | **[Outside material]** — menampilkan logo MBQ; alternatif dalam materi: `Icon(Icons.quiz)` |
+| `StatelessWidget` | SplashPage, HomePage, QuizDetailPage, QuizResultPage, StatistikPage, semua widget reusable | M1 |
 | `StatefulWidget` + `setState` | QuestionPage | M1, M4 |
 | `ElevatedButton` | Detail (Mulai), Question (navigasi soal), Result (ke Beranda) | M1 |
 | `Container` + `BoxDecoration` | kartu kuis, kartu opsi, hero card, badge, bar statistik | M2 |
@@ -669,13 +744,15 @@ MaterialApp(
 | `Stack` | QuizResultPage (lingkaran skor) | M3 |
 | `MediaQuery` | QuizResultPage (diameter lingkaran skor) | M3 |
 | `SafeArea` | body semua halaman | M3 |
-| `GestureDetector` (onTap) | QuizCard, ikon statistik, QuestionPage (membungkus AnswerOptionCard) | M4 |
+| `GestureDetector` (onTap) | SplashPage (seluruh layar), QuizCard, ikon statistik, QuestionPage (membungkus AnswerOptionCard) | M4 |
+| `HitTestBehavior.opaque` | SplashPage (area ketuk mencakup seluruh layar) | **[Outside material]** — properti `GestureDetector`; alternatif: membungkus body dengan `Container(color: mbqNavy)` tanpa behavior |
 | `Navigator.push(MaterialPageRoute)` / `Navigator.pop` | antar semua halaman | M4 |
 | Dart: `for`, `if`, ternary `? :`, method helper | QuizResultPage (hitung skor), QuestionPage (`_buildAnswerArea`) | M1 (dasar Dart) |
 | Dart: `widget.quiz`, `Map<int, int>` | QuestionPage | **[Needs lecturer verification]** |
 | `AnimatedContainer` (+ `Duration`) | AnswerOptionCard (animasi terpilih) | **[Outside material]** |
 | `SnackBar` (`ScaffoldMessenger`) | notifikasi kecil (opsional) | **[Outside material]** |
-| `Timer` (dart:async), `initState` | countdown berjalan (opsional) | **[Outside material]** |
+| `Timer` (dart:async), `initState`/`dispose` | QuestionPage (countdown 20 detik per soal, reset tiap ganti soal) | **[Outside material]** |
+| `TextField` + `TextEditingController` | QuestionPage (input jawaban esai, controller per soal di `Map`) | **[Outside material]** |
 | `useMaterial3: false`, `ColorScheme.light` | main.dart (tema) | **[Outside material]** |
 | `automaticallyImplyLeading` | QuizResultPage (AppBar) | **[Outside material]** |
 
@@ -685,11 +762,11 @@ MaterialApp(
 
 | Fase | Isi | Definition of Done |
 |---|---|---|
-| 1. Setup & Data | `flutter create mbq`; bersihkan `main.dart`; buat `theme/mbq_colors.dart`, `models/`, `data/dummy_data.dart`, `ThemeData`. | `flutter run` menampilkan 1 halaman kosong ber-theme (AppBar navy) tanpa error; `dummyQuizzes` terisi 3 kuis bertema sejarah (kuis 1 = "Quiz Sejarah Umum", campuran 3 tipe). |
-| 2. HomePage | `home_page.dart` + `widgets/quiz_card.dart`; navigasi ke halaman dummy. | 3 kartu kuis tampil rapi tanpa overflow; ketuk kartu berpindah halaman. |
+| 1. Setup & Data | `flutter create mbq`; bersihkan `main.dart`; buat `theme/mbq_colors.dart`, `models/`, `data/dummy_data.dart`, `ThemeData`; salin logo ke `assets/mbqlogo.png` + daftarkan di `pubspec.yaml`. | `flutter run` menampilkan 1 halaman kosong ber-theme (AppBar navy) tanpa error; `dummyQuizzes` terisi 3 kuis bertema sejarah (kuis 1 = "Quiz Sejarah Umum", campuran 3 tipe); logo termuat tanpa error asset. |
+| 2. HomePage & Splash | `splash_page.dart` (jadikan `home` di `main.dart`), `home_page.dart` + `widgets/quiz_card.dart`; navigasi splash → home. | Splash tampil (logo + teks putih di atas navy); ketuk di mana saja masuk ke HomePage; 3 kartu kuis + logo tampil rapi tanpa overflow. |
 | 3. QuizDetailPage | `quiz_detail_page.dart`; hero card + badge; info `Flexible`; tombol Mulai Kuis. | Semua info kuis tampil; badge tepat di kanan atas kartu; tombol navigasi berfungsi dua arah. |
 | 4. QuestionPage | `question_page.dart` + `widgets/answer_option_card.dart`; 3 tipe soal; navigasi soal. | Pilih opsi mengubah tampilan (setState) dan jawaban tetap tersimpan saat kembali ke soal sebelumnya; soal terakhir membuka halaman hasil; tidak overflow di AVD kecil. |
-| 5. Result, Statistik & Polishing | `quiz_result_page.dart`, `statistik_page.dart`, `widgets/stat_bar.dart`; animasi; rapikan `const`; screenshot. | Skor benar untuk kuis 1; kuis 3 (esai semua) tidak error; tombol "Kembali ke Beranda" sampai ke Home (tiga pop); semua kriteria checklist terpenuhi; 6 gambar screenshot (5 halaman, QuestionPage 2 varian) tersimpan di `screenshots/`. |
+| 5. Result, Statistik & Polishing | `quiz_result_page.dart`, `statistik_page.dart`, `widgets/stat_bar.dart`; animasi; rapikan `const`; screenshot. | Skor benar untuk kuis 1; kuis 3 (esai semua) tidak error; tombol "Kembali ke Beranda" sampai ke Home (tiga pop); semua kriteria checklist terpenuhi; 7 gambar screenshot (6 halaman, QuestionPage 2 varian) tersimpan di `screenshots/`. |
 
 ---
 
@@ -697,7 +774,7 @@ MaterialApp(
 
 | Anggota | Komponen | Alasan keseimbangan |
 |---|---|---|
-| **Anggota 1** | `main.dart`, `theme/mbq_colors.dart`, `models/` (Quiz, Question), `data/dummy_data.dart`, `home_page.dart`, `quiz_card.dart`, `statistik_page.dart`, `stat_bar.dart` | Fondasi + 2 halaman + 2 widget; beban sama dengan lainnya karena models/data jadi acuan semua orang. |
+| **Anggota 1** | `main.dart`, `theme/mbq_colors.dart`, `models/` (Quiz, Question), `data/dummy_data.dart`, `splash_page.dart` + `assets/mbqlogo.png`, `home_page.dart`, `quiz_card.dart`, `statistik_page.dart`, `stat_bar.dart` | Fondasi + splash + 2 halaman + 2 widget; beban sama dengan lainnya karena models/data jadi acuan semua orang. |
 | **Anggota 2** | `quiz_detail_page.dart`, `question_page.dart`, `answer_option_card.dart` | Halaman paling kompleks (state, 3 tipe soal, timer, animasi). |
 | **Anggota 3** | `quiz_result_page.dart`, penyesuaian animasi & kontras warna, pengecekan overflow di semua layar (AVD kecil & besar), `const` final, screenshot & dokumentasi README | Halaman hasil (logika skor) + quality control seluruh aplikasi. |
 
@@ -705,13 +782,13 @@ MaterialApp(
 - `main.dart` hanya disentuh Anggota 1; halaman lain di-import ke sana setelah tiap fase selesai.
 - Kepemilikan file tidak tumpang tindih; satu file satu penanggung jawab. Daftar file per anggota ini sama dengan tabel di README.
 - Sambungan antar halaman disepakati dari awal lewat constructor posisional (Bab 4), sehingga tiap anggota bisa menguji halamannya dengan data dummy sebelum digabung.
-- Sebelum demo: jalankan `flutter run` gabungan, cek alur Home → Detail → Question → Result → Home (tiga pop) dan alur Home → Statistik → Home.
+- Sebelum demo: jalankan `flutter run` gabungan, cek alur Splash → Home (ketuk di mana saja), Home → Detail → Question → Result → Home (tiga pop) dan alur Home → Statistik → Home.
 
 ---
 
 ## 11. Checklist Penilaian
 
-- [ ] Minimal 4 halaman UI (Home, Detail, Question, Result + Statistik tambahan)
+- [ ] Minimal 4 halaman UI (Splash, Home, Detail, Question, Result + Statistik tambahan)
 - [ ] Layout rapi tanpa overflow (cek di AVD ukuran kecil & besar)
 - [ ] Pemilihan widget tepat (Row/Column/Expanded/Flexible/SizedBox/Stack+Positioned sesuai fungsi layout)
 - [ ] Responsif: `SafeArea` di semua halaman, `MediaQuery` di lingkaran skor
@@ -739,7 +816,8 @@ MaterialApp(
 | `color:` dan `decoration:` bersamaan di `Container` → error | Jika pakai `BoxDecoration`, warna di dalam `BoxDecoration(color: ...)`. (Ditegaskan di materi M2.) |
 | `Expanded` di luar `Row`/`Column` → error | `Expanded`/`Flexible` hanya valid sebagai direct child `Row`/`Column`. |
 | `Column` overflow (kuning-hitam stripe) | Batasi jumlah dummy/opsi, bungkus area dengan `Expanded`, pakai `Flexible` pada kartu, dan uji di AVD kecil. |
-| Lupa `setState()` → variabel berubah tapi UI tidak | Setiap perubahan `_currentIndex`/`_answers` wajib dibungkus `setState(() { ... })`. |
+| Lupa `setState()` → variabel berubah tapi UI tidak | Setiap perubahan `_currentIndex`/`_answers`/`_remainingSeconds` wajib dibungkus `setState(() { ... })`. |
+| Timer terus berjalan setelah halaman ditutup / dobel saat ganti soal | `cancel()` timer lama sebelum membuat yang baru (`_startTimer`), dan `cancel()` di `dispose()`. |
 | Jawaban hilang saat menekan "Sebelumnya" | Simpan ke `_answers[_currentIndex]` dan baca kembali dari situ; jangan memakai satu variabel `_selectedIndex` yang di-reset. |
 | Membuat `List` jawaban berukuran `widget.quiz.questions.length` di deklarasi field | Tidak bisa (butuh `initState`). Pakai `Map<int, int> _answers = {}`. |
 | AppBar/tombol tidak navy (tema Material 3 default) | Pakai `useMaterial3: false` + `ColorScheme.light(primary: mbqNavy)`, atau set `backgroundColor` langsung. Uji di emulator. |
@@ -747,16 +825,16 @@ MaterialApp(
 | Salah `context` di `Navigator` | `Navigator.push(context, ...)` dipanggil dari `context` halaman yang aktif (di dalam `build`/callback widget), bukan dari luar widget. |
 | `const` salah tempat | Mulai tanpa `const`, tambahkan setelah kode jalan; halaman yang menerima data (`QuizDetailPage(quiz)`) tidak bisa `const`. |
 | Field private diakses lintas file (`_answers`) | State internal halaman tidak diakses halaman lain; data dikirim via constructor saat navigasi. |
-| Memakai `TextField`/`Radio` karena "lebih gampang" | Ingat batasan: solusi utama wajib `GestureDetector` + `Container` + `setState`; input form = materi P5–P6. |
-| Tidak sengaja menambah package di `pubspec.yaml` | UTS ini tidak butuh package; `pubspec.yaml` tidak diubah dari hasil `flutter create`. |
+| Memakai `Radio`/`Checkbox` karena "lebih gampang" | Ingat batasan: pilihan mc/tf wajib `GestureDetector` + `Container` + `setState`; satu-satunya widget input yang diizinkan adalah `TextField` untuk esai ([Outside material], lihat 5.3). |
+| Tidak sengaja menambah package di `pubspec.yaml` | UTS ini tidak butuh package; satu-satunya perubahan `pubspec.yaml` dari hasil `flutter create` adalah bagian `flutter > assets` untuk logo (`assets/mbqlogo.png`). |
 
 ---
 
 ## 13. Panduan untuk AI Agent Fase Coding
 
 1. **Ikuti PROJECTMAP ini apa adanya**: nama file, class, constructor (posisional), dan nama state sudah final; jangan mengganti tanpa alasan kuat yang dijelaskan.
-2. **Tetap dalam cakupan M1–4.** Hal di luar materi hanya yang sudah diizinkan di dokumen ini (`AnimatedContainer`, `SnackBar`, opsional `Timer`/`initState`, `useMaterial3: false` + `ColorScheme.light`, `automaticallyImplyLeading`) dan wajib diberi komentar label `[Outside material]` + alasan singkat di kodenya. Hal yang diberi `[Needs lecturer verification]` (`widget.quiz`, `Map<int, int>`, `Color(0xFF…)`) boleh dipakai tetapi disebutkan di penjelasan.
-3. **Jangan memakai** `ListView`, `SingleChildScrollView`, `.map().toList()`, collection-`for`/`if` di `children`, parameter callback pada widget reusable, `popUntil`, atau widget input P5–P6.
+2. **Tetap dalam cakupan M1–4.** Hal di luar materi hanya yang sudah diizinkan di dokumen ini (`AnimatedContainer`, `SnackBar`, `Timer`/`initState` untuk countdown per soal, `TextField` untuk input esai, `useMaterial3: false` + `ColorScheme.light`, `automaticallyImplyLeading`, `Image.asset` untuk logo, `HitTestBehavior.opaque`) dan wajib diberi komentar label `[Outside material]` + alasan singkat di kodenya. Hal yang diberi `[Needs lecturer verification]` (`widget.quiz`, `Map<int, int>`, `Color(0xFF…)`) boleh dipakai tetapi disebutkan di penjelasan.
+3. **Jangan memakai** `ListView`, `SingleChildScrollView`, `.map().toList()`, collection-`for`/`if` di `children`, parameter callback pada widget reusable, `popUntil`, atau widget input P5–P6 lain (`Checkbox`, `Radio`, `Switch`, `Dropdown`, Picker) — `TextField` untuk esai adalah pengecualian yang sudah diizinkan (lihat 5.3).
 4. **Jelaskan singkat mengapa**, bukan hanya memberi kode, karena pengguna sedang belajar.
 5. **Kode harus lengkap dan runnable**: setiap file dengan `import` yang benar, tanpa placeholder `// TODO`, tanpa package eksternal; aplikasi harus jalan setelah semua file dibuat.
 6. **Komentar kode berbahasa Indonesia**, identifier bahasa Inggris, `const` di mana memungkinkan, konsisten dengan design system (spacing kelipatan 8, radius 12, palet navy-putih dari logo MBQ).

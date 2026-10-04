@@ -1,30 +1,32 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
+// Smoke test sederhana: alur splash → halaman utama MBQ dengan 3 kartu kuis.
 import 'package:flutter/material.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:uts/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  testWidgets('Splash lalu halaman utama menampilkan judul MBQ dan 3 kartu kuis',
+      (tester) async {
+    // bangun aplikasi dan render satu frame
     await tester.pumpWidget(const MyApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // halaman pertama adalah splash: logo + instruksi ketuk
+    expect(
+        find.text('Tekan dimana saja untuk lanjut kerjakan quiz'),
+        findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // ketuk di mana saja (GestureDetector splash) untuk lanjut ke HomePage
+    await tester.tap(find.byType(GestureDetector).first);
+    await tester.pumpAndSettle();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // AppBar dan judul section tampil
+    expect(find.text('MBQ | My Belajar Quiz'), findsOneWidget);
+    expect(find.text('Pilih Kuis'), findsOneWidget);
+
+    // ketiga kartu kuis dummy tampil
+    expect(find.text('Quiz Sejarah Umum'), findsOneWidget);
+    expect(find.text('Sejarah Indonesia'), findsOneWidget);
+    expect(find.text('Sejarah Dunia'), findsOneWidget);
   });
 }

@@ -8,7 +8,7 @@ Anggota 2 [Daniel Revvelien - 825240134]
 Anggota 3 [Rafli Tri Ramadani - 825240157] 
 Dosen [Novario Jaya Perdana S.Kom M.T] 
 
-##  Deskripsi Singkat MBQ — My Belajar Quiz
+##  Deskripsi Singkat MBQ - My Belajar Quiz
 
 MBQ (My Belajar Quiz) adalah aplikasi kuis interaktif berbasis Flutter (Android) yang membantu dosen, pengajar, dan orang yang membutuhkan pembelajaran untuk membuat kuis untuk dipakai di kelas maupun sebagai latihan mandiri di luar jam kuliah. Aplikasi menyediakan daftar kuis per kategori, halaman pengerjaan soal (pilihan ganda, benar/salah, esai) dengan timer, serta hasil dan statistik kuis sebagai bahan evaluasi pembelajaran.
 
@@ -36,15 +36,15 @@ SplashPage (halaman pembuka) memakai gaya invert: background-nya justru biru tua
 ## Daftar Halaman
 
 1. SplashPage (halaman pembuka) - hanya logo MBQ dan teks "Tekan dimana saja untuk lanjut kerjakan quiz"; menekan di mana saja pada layar masuk ke daftar kuis. Background biru tua-navy dengan teks putih (invert).
-2. HomePage (Quiz List) — logo MBQ, daftar kuis beserta kategori, jumlah soal, dan durasi; ikon akses ke Statistik. Halaman wajib.
-3. QuizDetailPage — judul, badge kategori, deskripsi, jumlah soal, durasi, dan tombol "Mulai Kuis". Halaman wajib.
-4. QuestionPage — teks soal, kartu opsi jawaban (menyesuaikan 3 tipe soal), navigasi soal sebelumnya/berikutnya, dan timer countdown 20 detik per soal (merah + tebal pada 2 detik terakhir). Halaman wajib.
-5. QuizResultPage — skor, jumlah benar/salah, ringkasan hasil, dan mini-statistik; tombol kembali ke beranda. Halaman wajib.
-6. StatistikPage (halaman tambahan) — rekap nilai per kuis dalam bentuk bar sederhana untuk evaluasi belajar.
+2. HomePage (Quiz List) - logo MBQ, daftar kuis beserta kategori, jumlah soal, dan durasi; ikon akses ke Statistik. Halaman wajib.
+3. QuizDetailPage - judul, badge kategori, deskripsi, jumlah soal, durasi, dan tombol "Mulai Kuis". Halaman wajib.
+4. QuestionPage - teks soal, kartu opsi jawaban (menyesuaikan 3 tipe soal), navigasi soal sebelumnya/berikutnya, dan timer countdown 20 detik per soal (merah + tebal pada 2 detik terakhir). Halaman wajib.
+5. QuizResultPage - skor, jumlah benar/salah, ringkasan hasil, dan mini-statistik; tombol kembali ke beranda. Halaman wajib.
+6. StatistikPage (halaman tambahan) - rekap nilai per kuis dalam bentuk bar sederhana untuk evaluasi belajar.
 
 Detail teknis tiap halaman (wireframe, widget tree, state): lihat [PROJECTMAP.md](PROJECTMAP.md).
 
-## 🗂 Data Dummy (Tema: Quiz Sejarah Umum)
+## Data Dummy (Tema: Quiz Sejarah Umum)
 
 Seluruh data dummy bertema Quiz Sejarah Umum (tokoh, tempat, penemuan, dan peristiwa penting dalam sejarah dunia dan Indonesia).
 
@@ -58,7 +58,7 @@ flutter pub get     # unduh dependency (tidak ada package eksternal, tapi tetap 
 flutter run         # jalankan di emulator/perangkat
 
 
-## Struktur Folder (Ringkas)
+## Struktur Folder
 
 lib/
 ├── main.dart          # titik masuk aplikasi + ThemeData (home: SplashPage)

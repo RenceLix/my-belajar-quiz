@@ -42,8 +42,6 @@ SplashPage (halaman pembuka) memakai gaya invert: background-nya justru biru tua
 5. QuizResultPage - skor, jumlah benar/salah, ringkasan hasil, dan mini-statistik; tombol kembali ke beranda. Halaman wajib.
 6. StatistikPage (halaman tambahan) - rekap nilai per kuis dalam bentuk bar sederhana untuk evaluasi belajar.
 
-Detail teknis tiap halaman (wireframe, widget tree, state): lihat [PROJECTMAP.md](PROJECTMAP.md).
-
 ## Data Dummy (Tema: Quiz Sejarah Umum)
 
 Seluruh data dummy bertema Quiz Sejarah Umum (tokoh, tempat, penemuan, dan peristiwa penting dalam sejarah dunia dan Indonesia).
@@ -56,17 +54,3 @@ Quiz Sejarah Umum Umum 10 menit 6 soal campuran: 4 pilihan ganda, 1 benar/salah,
 flutter doctor      # cek kesiapan lingkungan
 flutter pub get     # unduh dependency (tidak ada package eksternal, tapi tetap dijalankan)
 flutter run         # jalankan di emulator/perangkat
-
-
-## Struktur Folder
-
-lib/
-├── main.dart          # titik masuk aplikasi + ThemeData (home: SplashPage)
-├── theme/             # konstanta warna MBQ (mbqNavy) & gaya teks
-├── models/            # class Quiz & Question
-├── data/              # data dummy (dummy_data.dart)
-├── pages/             # 6 halaman aplikasi (splash + 4 wajib + statistik)
-└── widgets/           # komponen reusable (QuizCard, AnswerOptionCard, StatBar)
-
-assets/
-└── mbqlogo.png        # logo MBQ (dipakai SplashPage & HomePage)
